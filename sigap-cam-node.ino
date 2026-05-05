@@ -39,6 +39,7 @@ void callback(char* topic, byte* payload, unsigned int length) {
   // 2. topic_request = ENV_MQTT_TOPIC_REQUEST
   if (String(topic) == ENV_MQTT_TOPIC_REQUEST && message == "TAKE_PHOTO") {
     Serial.println("🎯 Perintah dari HiveMQ Diterima! Mulai memotret...");
+    sendDebugLog("🎯 ESP32 Cam: Perintah Diterima! Memulai proses potret...");
     sendPhotoToServer();
   }
 }
@@ -59,6 +60,12 @@ void reconnectMQTT() {
       Serial.print(mqttClient.state());
       delay(5000);
     }
+  }
+}
+
+void sendDebugLog(String logMessage) {
+  if (mqttClient.connected()) {
+    mqttClient.publish(ENV_MQTT_TOPIC_UI_STATE, logMessage.c_str());
   }
 }
 
@@ -109,6 +116,7 @@ void loop() {
 void sendPhotoToServer() {
   //// 1. TRIK HEMAT RAM: Putus koneksi MQTT sementara!
   Serial.println("🧹 Membebaskan memori: Memutus koneksi MQTT sementara...");
+  sendDebugLog("🧹 ESP32 Cam: Memutus koneksi MQTT sementara untuk alokasi RAM...");
   mqttClient.disconnect();
   mqtt_net.stop();
   delay(500); // Memberi waktu 0.5 detik agar RAM dan antena WiFi stabil
@@ -197,4 +205,8 @@ void sendPhotoToServer() {
   
   Serial.println("🔄 Pengiriman selesai. Mengembalikan koneksi MQTT...");
   // Setelah ini fungsi selesai, dan loop() akan otomatis memanggil reconnectMQTT()
+
+  reconnectMQTT();
+
+  sendDebugLog("✅ ESP32 Cam: Foto berhasil dikirim ke Endpoint Ngrok! Menunggu AI..."); 
 }
