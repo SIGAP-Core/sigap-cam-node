@@ -94,6 +94,12 @@ void setup() {
 
   esp_camera_init(&config);
 
+  // ROTASI 180 DERAJAT
+  sensor_t * s = esp_camera_sensor_get();
+  // Memutar 180 derajat = Flip Vertikal + Mirror Horizontal
+  s->set_vflip(s, 1);    // 1 = Aktifkan flip vertikal
+  s->set_hmirror(s, 1);  // 1 = Aktifkan mirror horizontal
+
   // 5. SSID & PASSWORD = WIFI_SSID & WIFI_PASSWORD
   WiFi.begin(ENV_WIFI_SSID, ENV_WIFI_PASSWORD);
   while (WiFi.status() != WL_CONNECTED) { delay(500); Serial.print("."); }
